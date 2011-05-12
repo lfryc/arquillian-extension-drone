@@ -17,16 +17,16 @@
 package org.jboss.arquillian.drone.example;
 
 import static org.jboss.arquillian.ajocado.Ajocado.elementPresent;
+import static org.jboss.arquillian.ajocado.Ajocado.guardHttp;
+import static org.jboss.arquillian.ajocado.Ajocado.id;
 import static org.jboss.arquillian.ajocado.Ajocado.waitModel;
-import static org.jboss.arquillian.ajocado.guard.request.RequestTypeGuardFactory.waitHttp;
-import static org.jboss.arquillian.ajocado.locator.LocatorFactory.id;
-import static org.jboss.arquillian.ajocado.locator.LocatorFactory.xp;
+import static org.jboss.arquillian.ajocado.Ajocado.xp;
 
 import java.net.URL;
 
 import org.jboss.arquillian.ajocado.framework.AjaxSelenium;
 import org.jboss.arquillian.ajocado.locator.IdLocator;
-import org.jboss.arquillian.ajocado.locator.XpathLocator;
+import org.jboss.arquillian.ajocado.locator.XPathLocator;
 import org.jboss.arquillian.drone.annotation.ContextPath;
 import org.jboss.arquillian.drone.annotation.Drone;
 import org.jboss.arquillian.junit.Arquillian;
@@ -53,8 +53,8 @@ public class AjocadoTestCase extends AbstractTestCase
    @ContextPath
    URL contextPath;
 
-   protected XpathLocator LOGGED_IN = xp("//li[contains(text(),'Welcome')]");
-   protected XpathLocator LOGGED_OUT = xp("//li[contains(text(),'Goodbye')]");
+   protected XPathLocator LOGGED_IN = xp("//li[contains(text(),'Welcome')]");
+   protected XPathLocator LOGGED_OUT = xp("//li[contains(text(),'Goodbye')]");
 
    protected IdLocator USERNAME_FIELD = id("loginForm:username");
    protected IdLocator PASSWORD_FIELD = id("loginForm:password");
@@ -71,10 +71,10 @@ public class AjocadoTestCase extends AbstractTestCase
       driver.type(USERNAME_FIELD, "demo");
       driver.type(PASSWORD_FIELD, "demo");
       
-      waitHttp(driver).click(LOGIN_BUTTON);
+      guardHttp(driver).click(LOGIN_BUTTON);
       Assert.assertTrue("User should be logged in!", driver.isElementPresent(LOGGED_IN));
       
-      waitHttp(driver).click(LOGOUT_BUTTON);
+      guardHttp(driver).click(LOGOUT_BUTTON);
       Assert.assertTrue("User should not be logged in!", driver.isElementPresent(LOGGED_OUT));
    }
 

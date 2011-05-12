@@ -16,17 +16,13 @@
  */
 package org.jboss.arquillian.drone.factory;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.jboss.arquillian.ajocado.encapsulated.JavaScript;
 import org.jboss.arquillian.ajocado.framework.AjaxSelenium;
 import org.jboss.arquillian.ajocado.framework.AjaxSeleniumContext;
 import org.jboss.arquillian.ajocado.framework.AjaxSeleniumImpl;
 import org.jboss.arquillian.ajocado.framework.AjocadoConfigurationContext;
-import org.jboss.arquillian.ajocado.locator.ElementLocationStrategy;
+import org.jboss.arquillian.ajocado.framework.internal.AjocadoInitializator;
 import org.jboss.arquillian.drone.configuration.ArquillianAjocadoConfiguration;
 import org.jboss.arquillian.drone.spi.Configurator;
 import org.jboss.arquillian.drone.spi.Destructor;
@@ -62,10 +58,10 @@ public class AjocadoFactory implements Configurator<AjaxSelenium, ArquillianAjoc
     */
    public void destroyInstance(AjaxSelenium instance)
    {
-      AjaxSeleniumContext.set(null);
-      instance.close();
-      instance.stop();
-      instance = null;
+      AjaxSeleniumContext.set(null);  
+      if (instance instanceof AjocadoInitializator) {
+          ((AjocadoInitializator) instance).finalizeBrowser();
+      }
    }
 
    /*
@@ -77,22 +73,13 @@ public class AjocadoFactory implements Configurator<AjaxSelenium, ArquillianAjoc
     */
    public AjaxSelenium createInstance(ArquillianAjocadoConfiguration configuration)
    {
-      AjaxSelenium selenium = new AjaxSeleniumImpl(configuration.getSeleniumHost(), configuration.getSeleniumPort(), configuration.getBrowser(), configuration.getContextRoot());
+      AjaxSeleniumImpl selenium = new AjaxSeleniumImpl(configuration.getSeleniumHost(), configuration.getSeleniumPort(), configuration.getBrowser(), configuration.getContextRoot());
       AjaxSeleniumContext.set(selenium);
-
-      selenium.enableNetworkTrafficCapturing(configuration.isSeleniumNetworkTrafficEnabled());
-      selenium.start();
-
-      loadCustomLocationStrategies(selenium);
-      initializeExtensions(selenium);
-
-      selenium.setSpeed(configuration.getSeleniumSpeed());
-
-      if (configuration.isSeleniumMaximize())
-      {
-         selenium.windowFocus();
-         selenium.windowMaximize();
-      }
+      
+      selenium.initializeBrowser();
+      selenium.initializeSeleniumExtensions();
+      selenium.initializePageExtensions();
+      selenium.configureBrowser();
 
       return selenium;
    }
@@ -111,40 +98,6 @@ public class AjocadoFactory implements Configurator<AjaxSelenium, ArquillianAjoc
       configuration.configure(descriptor, qualifier);
       AjocadoConfigurationContext.set(configuration);
       return configuration;
-   }
-
-   private void loadCustomLocationStrategies(AjaxSelenium selenium)
-   {
-      // jQuery location strategy
-      JavaScript strategySource = JavaScript.fromResource("javascript/selenium-location-strategies/jquery-location-strategy.js");
-      selenium.addLocationStrategy(ElementLocationStrategy.JQUERY, strategySource);
-   }
-
-   private void initializeExtensions(AjaxSelenium selenium)
-   {
-
-      List<String> seleniumExtensions = getExtensionsListFromResource("javascript/selenium-extensions-order.txt");
-      List<String> pageExtensions = getExtensionsListFromResource("javascript/page-extensions-order.txt");
-
-      // loads the extensions to the selenium
-      selenium.getSeleniumExtensions().requireResources(seleniumExtensions);
-      // register the handlers for newly loaded extensions
-      selenium.getSeleniumExtensions().registerCustomHandlers();
-      // prepares the resources to load into page
-      selenium.getPageExtensions().loadFromResources(pageExtensions);
-   }
-
-   @SuppressWarnings("unchecked")
-   private List<String> getExtensionsListFromResource(String resourceName)
-   {
-      try
-      {
-         return IOUtils.readLines(ClassLoader.getSystemResourceAsStream(resourceName));
-      }
-      catch (IOException e)
-      {
-         throw new IllegalStateException(e);
-      }
    }
 
 }
