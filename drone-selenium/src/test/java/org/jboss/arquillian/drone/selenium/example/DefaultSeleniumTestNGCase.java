@@ -26,14 +26,14 @@ import org.jboss.arquillian.drone.selenium.example.webapp.LoggedIn;
 import org.jboss.arquillian.drone.selenium.example.webapp.Login;
 import org.jboss.arquillian.drone.selenium.example.webapp.User;
 import org.jboss.arquillian.drone.selenium.example.webapp.Users;
-import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ArchivePaths;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.thoughtworks.selenium.DefaultSelenium;
 
@@ -44,8 +44,7 @@ import com.thoughtworks.selenium.DefaultSelenium;
  *
  * @author <a href="mailto:kpiwko@redhat.com">Karel Piwko</a>
  */
-@RunWith(Arquillian.class)
-public class DefaultSeleniumTestCase {
+public class DefaultSeleniumTestNGCase extends Arquillian {
     // load selenium driver
     @Drone
     DefaultSelenium driver;
@@ -96,12 +95,17 @@ public class DefaultSeleniumTestCase {
         return war;
     }
 
+    @BeforeMethod
+    public void setUp() {
+        driver.open(contextPath + "/home.jsf");
+    }
+    
     @Test
     public void testLoginAndLogout() {
         Assert.assertNotNull("Path is not null", contextPath);
         Assert.assertNotNull("Default Selenium is not null", driver);
 
-        driver.open(contextPath + "/home.jsf");
+        
 
         driver.type(USERNAME_FIELD, USERNAME);
         driver.type(PASSWORD_FIELD, PASSWORD);
