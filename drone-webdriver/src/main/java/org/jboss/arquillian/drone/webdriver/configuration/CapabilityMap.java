@@ -105,6 +105,29 @@ enum CapabilityMap {
         }
 
     },
+    PHANTOMJS {
+
+        @Override
+        public String getImplementationClass() {
+            return "eu.fryc.ghostdriver.PhantomJSDriver";
+        }
+
+        @Override
+        public DesiredCapabilities getCapabilities() {
+            return new DesiredCapabilities();
+        }
+
+        @Override
+        public String getReadableName() {
+            return "phantomjs";
+        }
+
+        @Override
+        public Class<? extends WebDriverConfigurationType> getWebDriverConfigurationType() {
+            return PhantomJSDriverConfiguration.class;
+        }
+
+    },
     INTERNETEXPLORER {
 
         @Override

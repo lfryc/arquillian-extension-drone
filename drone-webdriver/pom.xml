@@ -117,6 +117,11 @@
             <version>${version.com.opera}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>eu.fryc</groupId>
+            <artifactId>ghostdriver-java</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 
         <!-- test dependencies -->
         <dependency>
